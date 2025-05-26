@@ -1,50 +1,42 @@
-import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
+import { MemoryRouter as Router, Routes, Route, BrowserRouter, HashRouter, useNavigate } from 'react-router-dom';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
 import icon from '../../assets/icon.svg';
 import './App.css';
+import { Scanner } from './pages/Scanner';
+import { Button } from '@mui/material';
 
 function Hello() {
   return (
-    <div>
-      <div className="Hello">
-        <img width="200" alt="icon" src={icon} />
-      </div>
-      <h1>electron-react-boilerplate</h1>
-      <div className="Hello">
-        <a
-          href="https://electron-react-boilerplate.js.org/"
-          target="_blank"
-          rel="noreferrer"
-        >
-          <button type="button">
-            <span role="img" aria-label="books">
-              📚
-            </span>
-            Read our docs
-          </button>
-        </a>
-        <a
-          href="https://github.com/sponsors/electron-react-boilerplate"
-          target="_blank"
-          rel="noreferrer"
-        >
-          <button type="button">
-            <span role="img" aria-label="folded hands">
-              🙏
-            </span>
-            Donate
-          </button>
-        </a>
-      </div>
-    </div>
+    <>
+      <h1>Hello</h1>
+    </>
   );
 }
 
 export default function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Hello />} />
-      </Routes>
-    </Router>
+    <>
+      <div className='app'>
+
+        <div className='app-header'>
+          <h1>Hello</h1>
+        </div>
+        <div className='app-content'>
+          <HashRouter>
+            <Routes>
+              <Route path="/" element={<Scanner/>} />
+              {/* <Route path="/login" element={<LoginPage />} /> */}
+              {/* <Route path="/register" element={<RegisterPage />} /> */}
+              <Route path="/scan" element={<Scanner />} />
+              <Route path="/analysis" element={<></>} />
+              <Route path="/dictionary" element={<></>} />
+
+            </Routes>
+          </HashRouter>
+        </div>
+      </div>
+
+    </>
   );
 }
