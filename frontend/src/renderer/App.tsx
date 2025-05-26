@@ -5,6 +5,7 @@ import icon from '../../assets/icon.svg';
 import './App.css';
 import { Scanner } from './pages/Scanner';
 import { Button } from '@mui/material';
+import { Analysis } from './pages/Analysis';
 
 function Hello() {
   return (
@@ -29,7 +30,7 @@ export default function App() {
               {/* <Route path="/login" element={<LoginPage />} /> */}
               {/* <Route path="/register" element={<RegisterPage />} /> */}
               <Route path="/scan" element={<Scanner />} />
-              <Route path="/analysis" element={<></>} />
+              <Route path="/analysis" element={<Analysis />} />
               <Route path="/dictionary" element={<></>} />
 
             </Routes>

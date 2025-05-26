@@ -1,13 +1,10 @@
 import { useState } from 'react';
 import { Box, Button, ButtonGroup, TextField, Typography, IconButton } from '@mui/material';
-import theme from '../styles/theme';
-import { ThemeProvider } from '@mui/material/styles';
 import AddIcon from '@mui/icons-material/Add';
 import { useNavigate } from 'react-router-dom';
-export const Scanner = () => {
+export function Scanner() {
   const navigate = useNavigate();
   const [currentOption, setCurrentOption] = useState<"scan" | "input">("scan");
-  const [hasDoneScan, setHasDoneScan] = useState(false);
 
   return (
       <Box sx={{
