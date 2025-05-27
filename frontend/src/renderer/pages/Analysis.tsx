@@ -4,8 +4,9 @@ import AutoStoriesIcon from '@mui/icons-material/AutoStories';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { kanjiDatabase, KanjiInfo } from '../misc/dummyData'
+import { useNavigate } from "react-router-dom";
 
 const centeredFlexColumn = {
   display: 'flex',
@@ -21,7 +22,7 @@ const centeredFlexColumn = {
 
 
 export function Analysis() {
-
+  const navigate = useNavigate(); 
   const [text, setText] = useState("");
   const [kanjiForDetailView, setKanjiForDetailView] = useState<KanjiInfo | null>(null);
   const [selectedPhrases, setSelectedPhrases] = useState<string[]>([]);
@@ -237,7 +238,12 @@ export function Analysis() {
                 <Typography sx={{fontWeight: "bold", fontSize: "2rem", color: "white"}}>{kanjiForDetailView ? `Detailed Information: ${kanjiForDetailView.kanji}` : "Detailed Information"}</Typography>
                 {kanjiForDetailView && 
                 // will redirect to the direcitonary page to show more info or something
-                  <Button sx={{fontWeight: "bold", fontSize: "0.9375rem", color: "white", backgroundColor: "#27272A", borderRadius: "10px"}}>
+                  <Button 
+                    sx={{fontWeight: "bold", fontSize: "0.9375rem", color: "white", backgroundColor: "#27272A", borderRadius: "10px"}}
+                    onClick={() => {
+                      navigate(`/dictionary/${kanjiForDetailView.kanji}`);
+                    }}
+                  >
                     <ArrowForwardIcon sx={{fontSize: "1.875rem", color: "white", backgroundColor: "transparent"}}></ArrowForwardIcon>
                   </Button>
                 }

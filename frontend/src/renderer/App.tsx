@@ -6,6 +6,7 @@ import './App.css';
 import { Scanner } from './pages/Scanner';
 import { Button } from '@mui/material';
 import { Analysis } from './pages/Analysis';
+import { Dictionary } from './pages/Dictionary';
 
 function Hello() {
   return (
@@ -31,7 +32,7 @@ export default function App() {
               {/* <Route path="/register" element={<RegisterPage />} /> */}
               <Route path="/scan" element={<Scanner />} />
               <Route path="/analysis" element={<Analysis />} />
-              <Route path="/dictionary" element={<></>} />
+              <Route path="/dictionary/:phrase" element={<Dictionary />} />
 
             </Routes>
           </HashRouter>
