@@ -12,21 +12,21 @@ export function DictionarySearchBar({ doSearch, search, setSearch }: { doSearch:
       <Paper
         component="form"
         sx={{
-          boxSizing: "border-box", 
-          p: '5px 20px', 
-          display: 'flex', 
-          alignItems: 'center', 
-          width: "100%", 
-          backgroundColor: "transparent", 
-          borderRadius: "10px", 
-          outline: "1px solid grey", 
-          height: "3em",
-          "&:hover": {outline: "2px solid white"}, 
+          boxSizing: "border-box",
+          p: { xs: '3px 10px', md: '5px 20px' },
+          display: 'flex',
+          alignItems: 'center',
+          width: "100%",
+          backgroundColor: "transparent",
+          borderRadius: "10px",
+          outline: "1px solid grey",
+          height: { xs: "2.5em", md: "3em" },
+          "&:hover": {outline: "2px solid white"},
           "&:focus-within": {outline: "2px solid white"},
-          "&:focus-visible": {outline: "2px solid white"} 
+          "&:focus-visible": {outline: "2px solid white"}
         }}
       >
-        <SearchIcon sx={{fontSize: "2rem", color: "white"}} />
+        <SearchIcon sx={{fontSize: { xs: "1.5rem", md: "2rem" }, color: "white"}} />
         <InputBase
           onKeyUp={(e) => {
             if (e.key === 'Enter') {
@@ -34,12 +34,18 @@ export function DictionarySearchBar({ doSearch, search, setSearch }: { doSearch:
             }
           }}
           onChange={(e) => setSearch(e.target.value)}
-          sx={{ ml: 1, flex: 1, color: "white", fontSize: "1.25rem" }}
-          placeholder="Search for words, kanji, phrases and meanings."
+          value={search}
+          sx={{ 
+            ml: 1, 
+            flex: 1, 
+            color: "white", 
+            fontSize: { xs: "1rem", md: "1.25rem" }
+          }}
+          placeholder="Search..."
           inputProps={{ 'aria-label': 'search for words, kanji, phrases and meanings' }}
         />
-        <IconButton type="button" sx={{ p: '10px' }} aria-label="search" onClick={() => doSearch(search)}>
-          <SubdirectoryArrowRightIcon sx={{fontSize: "2rem", color: "white", cursor: "pointer"}} />
+        <IconButton type="button" sx={{ p: { xs: '5px', md: '10px' } }} aria-label="search" onClick={() => doSearch(search)}>
+          <SubdirectoryArrowRightIcon sx={{fontSize: { xs: "1.5rem", md: "2rem" }, color: "white", cursor: "pointer"}} />
         </IconButton>
       </Paper>
   );
