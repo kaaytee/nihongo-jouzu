@@ -1,7 +1,7 @@
 import { Box, SxProps } from "@mui/material";
 import { Theme } from '@mui/material/styles';
 
-export function ThemedBox({ sx, children}: { sx?: SxProps<Theme>, children?: React.ReactNode }) {
+export function ThemedBox({ sx, children, onClick }: { sx?: SxProps<Theme>, children?: React.ReactNode, onClick?: () => void }) {
   const centeredFlexColumn: SxProps<Theme> = {
     display: 'flex',
     flexDirection: 'column',
@@ -15,7 +15,7 @@ export function ThemedBox({ sx, children}: { sx?: SxProps<Theme>, children?: Rea
   };
   
   return (
-    <Box sx={{ ...centeredFlexColumn, ...sx } as SxProps<Theme>}>
+    <Box sx={{ ...centeredFlexColumn, ...sx } as SxProps<Theme>} onClick={onClick}>
       {children}
     </Box>
   );
