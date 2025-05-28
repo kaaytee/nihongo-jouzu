@@ -208,21 +208,21 @@ export function Analysis() {
         {/* bottom bar with play audio, copy and  reset selection */}
         <Box sx={{width: "100%", padding: "0 20px 10px 20px", backgroundColor: "transparent", borderRadius: "10px", display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: "10px"}}>
             <Box sx={{display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "flex-start", gap: "10px"}}>
-              <VolumeUpIcon sx={{fontSize: "1.875rem", color: "white"}} />
-              <Button sx={{fontWeight: "bold", fontSize: "0.9375rem", color: "white", backgroundColor: "transparent", borderRadius: "10px"}}>
-                Play Audio
+              <Button sx={{fontWeight: "bold", fontSize: "0.9375rem", color: "white", backgroundColor: "transparent", borderRadius: "10px", gap: "5px"}}>
+                <VolumeUpIcon sx={{fontSize: "1.875rem", color: "white"}} />
+                <Typography sx={{fontSize: "0.9375rem", color: "white"}}> Play Audio</Typography>
               </Button> 
             </Box>  
             <Box sx={{display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "flex-start", gap: "10px"}}>
-              <RefreshIcon sx={{fontSize: "1.875rem", color: "white"}}></RefreshIcon>
               <Button sx={{fontWeight: "bold", fontSize: "0.9375rem", color: "white", backgroundColor: "transparent", borderRadius: "10px"}}>
-                Reset Selection
+                <RefreshIcon sx={{fontSize: "1.875rem", color: "white"}}></RefreshIcon>
+                <Typography sx={{fontSize: "0.9375rem", color: "white"}}>Reset Selection</Typography>
               </Button>
             </Box>
             <Box sx={{display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "flex-start", gap: "10px"}}>
-              <ContentCopyIcon sx={{fontSize: "1.875rem", color: "white"}} />
               <Button sx={{fontWeight: "bold", fontSize: "0.9375rem", color: "white", backgroundColor: "transparent", borderRadius: "10px"}}>
-              Copy
+                <ContentCopyIcon sx={{fontSize: "1.875rem", color: "white"}} />
+                <Typography sx={{fontSize: "0.9375rem", color: "white"}}>Copy</Typography>
               </Button>
             </Box>
         </Box>
