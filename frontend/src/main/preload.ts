@@ -34,7 +34,7 @@ const electronHandler = {
   api: {
     getDummyData: async () => {
       try {
-        console.log("fetching data");
+        console.log("fetching dummy data");
         const response = await axios.get(`${BACKEND_URL}/scan/translate`, {
           headers: {
             'Content-Type': 'application/json',
@@ -43,30 +43,30 @@ const electronHandler = {
         return response.data;
       } catch (error: unknown) {
         if (axios.isAxiosError(error)) {
-          console.error('Error fetching data (AxiosError):', error.message, error.response?.data);
+          console.error('Error fetching dummy data (AxiosError):', error.message, error.response?.data);
         } else {
-          console.error('Error fetching data (Unknown):', error);
+          console.error('Error fetching dummy data (Unknown):', error);
         }
         throw error;
       }
     },
-    sendImageToBackend: async (imageDataUrl: string) => {
+    sendImageForTranslation: async (imageDataUrl: string) => {
       try {
-        console.log('Sending image to backend...');
-        const response = await axios.post(`${BACKEND_URL}/scan/receive-image`, {
+        console.log('Sending image to backend for translation (/scan/translate)...');
+        const response = await axios.post(`${BACKEND_URL}/scan/translate`, {
           imageData: imageDataUrl,
         }, {
           headers: {
             'Content-Type': 'application/json',
           },
         });
-        console.log('Backend response:', response.data);
+        console.log('Backend translation response:', response.data);
         return response.data;
       } catch (error: unknown) {
         if (axios.isAxiosError(error)) {
-          console.error('Error sending image to backend (AxiosError):', error.message, error.response?.data);
+          console.error('Error sending image for translation (AxiosError):', error.message, error.response?.data);
         } else {
-          console.error('Error sending image to backend (Unknown):', error);
+          console.error('Error sending image for translation (Unknown):', error);
         }
         throw error;
       }

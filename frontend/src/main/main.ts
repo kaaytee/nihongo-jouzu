@@ -166,105 +166,11 @@ ipcMain.handle('capture-screen-snip', async () => {
         cleanupAndResolve(null);
       });
       
+      // Define path to screen-selector.html in assets
       const RESOURCES_PATH = app.isPackaged
         ? path.join(process.resourcesPath, 'assets')
-        : path.join(__dirname, '../../assets');
+        : path.join(__dirname, '../../assets'); // Points to frontend/assets in dev
       const selectorHtmlPath = path.join(RESOURCES_PATH, 'screen-selector.html');
-      
-      if (!fs.existsSync(selectorHtmlPath)) {
-          console.error('screen-selector.html not found at', selectorHtmlPath);
-          const placeholderContent = `
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <meta charset="UTF-8">
-                <title>Select Area</title>
-                <style>
-                    html, body { 
-                        background-color: transparent !important; 
-                        margin: 0; 
-                        padding: 0; 
-                        width: 100%; 
-                        height: 100%; 
-                        overflow: hidden; 
-                    }
-                    #selection-box {
-                        position: absolute;
-                        border: 2px dashed #007bff;
-                        background-color: rgba(0, 123, 255, 0.1);
-                        box-sizing: border-box;
-                    }
-                    #overlay {
-                        position: absolute;
-                        top:0; left:0; width:100%; height:100%;
-                        background-color: rgba(0,0,0,0.3);
-                        cursor: crosshair;
-                    }
-                </style>
-            </head>
-            <body>
-                <div id="overlay"></div>
-                <div id="selection-box"></div>
-                <script>
-                    const { ipcRenderer } = require('electron');
-                    const overlay = document.getElementById('overlay');
-                    const selectionBox = document.getElementById('selection-box');
-                    let startX, startY, isDrawing = false;
-
-                    document.addEventListener('keydown', (e) => {
-                        if (e.key === 'Escape') {
-                            ipcRenderer.send('capture-area-selected', null);
-                        }
-                    });
-
-                    overlay.addEventListener('mousedown', (e) => {
-                        startX = e.clientX;
-                        startY = e.clientY;
-                        isDrawing = true;
-                        selectionBox.style.left = startX + 'px';
-                        selectionBox.style.top = startY + 'px';
-                        selectionBox.style.width = '0px';
-                        selectionBox.style.height = '0px';
-                        selectionBox.style.display = 'block';
-                    });
-
-                    overlay.addEventListener('mousemove', (e) => {
-                        if (!isDrawing) return;
-                        const width = e.clientX - startX;
-                        const height = e.clientY - startY;
-                        selectionBox.style.width = Math.abs(width) + 'px';
-                        selectionBox.style.height = Math.abs(height) + 'px';
-                        selectionBox.style.left = (width > 0 ? startX : e.clientX) + 'px';
-                        selectionBox.style.top = (height > 0 ? startY : e.clientY) + 'px';
-                    });
-
-                    overlay.addEventListener('mouseup', (e) => {
-                        if (!isDrawing) return;
-                        isDrawing = false;
-                        selectionBox.style.display = 'none';
-                        const rect = {
-                            x: parseInt(selectionBox.style.left),
-                            y: parseInt(selectionBox.style.top),
-                            width: parseInt(selectionBox.style.width),
-                            height: parseInt(selectionBox.style.height)
-                        };
-                        if (rect.width > 0 && rect.height > 0) {
-                           ipcRenderer.send('capture-area-selected', rect);
-                        } else {
-                           ipcRenderer.send('capture-area-selected', null);
-                        }
-                    });
-                </script>
-            </body>
-            </html>
-          `;
-          const assetsDir = path.join(__dirname, '../../assets');
-          if (!fs.existsSync(assetsDir)){
-              fs.mkdirSync(assetsDir, { recursive: true });
-          }
-          fs.writeFileSync(selectorHtmlPath, placeholderContent);
-          console.log('Created placeholder screen-selector.html with explicit transparent body and Esc support.');
-      }
       
       selectorWindow.loadFile(selectorHtmlPath);
     });

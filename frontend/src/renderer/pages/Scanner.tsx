@@ -43,11 +43,16 @@ export function Scanner() {
 
               // interact with backend
               try {
-                console.log('Attempting to send image to backend...');
-                const backendResponse = await window.electron.api.sendImageToBackend(croppedDataUrl);
-                console.log('Successfully sent image to backend:', backendResponse);
+                console.log('Attempting to send image to backend for translation...');
+                const backendResponse = await window.electron.api.sendImageForTranslation(croppedDataUrl);
+                console.log('Successfully sent image to backend for translation.');
+                if (backendResponse && backendResponse.translated_text) {
+                  console.log('Translated text:', backendResponse.translated_text);
+                } else {
+                  console.log('Backend response did not contain translated_text:', backendResponse);
+                }
               } catch (uploadError) {
-                console.error('Failed to send image to backend:', uploadError);
+                console.error('Failed to send image for translation or process backend response:', uploadError);
               }
 
             } else {
