@@ -12,19 +12,18 @@ from it
 
 ## todoz
 ### frontend
--
--  clean up ui, header stufffff
-- the actual snip scanner
+- [ ] clean up ui, header stufffff
+- [x] the actual snip scanner
 - ui ux stuff
-  - loading from scanner shouldnt move to a new page, just have button
-  - more navigation,
-  - fix up header
-  - responsivenes?
-- refactor EVERUTHING.
+  - [ ] loading from scanner shouldnt move to a new page, just have button
+  - [ ] more navigation,
+  - [ ] fix up header
+  - [ ] responsivenes?
+- [ ] refactor EVERUTHING.
 ### backend
--
-- implement users 
-- implement auth for users 
-- setup db, data
-- impmenet everythingh lol
+- [ ] implement users 
+- [ ] implement auth for users 
+- [ ] setup db, data
+- [ ] Handle the image sent by frontend, process it and return string of data
+- [ ] impmenet everythingh lol
 
