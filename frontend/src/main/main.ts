@@ -9,11 +9,12 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
-import { app, BrowserWindow, shell, ipcMain } from 'electron';
+import { app, BrowserWindow, shell, ipcMain, desktopCapturer, screen } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
+import fs from 'fs';
 
 class AppUpdater {
   constructor() {
@@ -31,6 +32,251 @@ ipcMain.on('ipc-example', async (event, arg) => {
   event.reply('ipc-example', msgTemplate('pong'));
 });
 
+// New IPC handler for screen capture
+ipcMain.handle('capture-screen-snip', async () => {
+  if (!mainWindow) {
+    return null;
+  }
+
+  const currentDisplay = screen.getDisplayMatching(mainWindow.getBounds());
+  let mainWindowWasMinimized = false;
+
+  if (mainWindow.isMinimizable() && !mainWindow.isMinimized()) {
+    mainWindow.minimize();
+    mainWindowWasMinimized = true;
+    await new Promise(resolve => setTimeout(resolve, 100));
+  }
+
+  try {
+    const sources = await desktopCapturer.getSources({
+      types: ['screen'],
+      thumbnailSize: {
+        width: Math.floor(currentDisplay.size.width * currentDisplay.scaleFactor),
+        height: Math.floor(currentDisplay.size.height * currentDisplay.scaleFactor)
+      },
+      fetchWindowIcons: false,
+    });
+
+    let targetSource = sources.find(source => source.display_id === String(currentDisplay.id));
+
+    if (!targetSource && sources.length > 0) {
+      console.warn(`Could not find screen source for display ID ${currentDisplay.id}. Falling back to the first available source.`);
+      targetSource = sources[0];
+    }
+    
+    if (!targetSource) {
+      console.error('No screen source found after attempting to match current display.');
+      if (mainWindowWasMinimized && mainWindow && !mainWindow.isDestroyed() && mainWindow.isMinimized()) {
+        mainWindow.restore();
+      }
+      return null;
+    }
+
+    return new Promise((resolvePromise) => {
+      let resolved = false;
+
+      const selectorWindow = new BrowserWindow({
+        x: currentDisplay.bounds.x,
+        y: currentDisplay.bounds.y,
+        width: currentDisplay.bounds.width,
+        height: currentDisplay.bounds.height,
+        transparent: true,
+        backgroundColor: '#00000000',
+        frame: false,
+        alwaysOnTop: true,
+        skipTaskbar: true,
+        webPreferences: {
+          nodeIntegration: true,
+          contextIsolation: false,
+        },
+        show: false,
+      });
+
+      selectorWindow.webContents.once('dom-ready', () => {
+        if (!selectorWindow.isDestroyed()) {
+          selectorWindow.show();
+          selectorWindow.focus(); 
+        }
+      });
+      
+      const cleanupAndResolve = (value: any) => {
+        if (resolved) return;
+        resolved = true;
+
+        if (selectorWindow && !selectorWindow.isDestroyed()) {
+          selectorWindow.close();
+        }
+        ipcMain.removeListener('capture-area-selected', onCaptureAreaSelected);
+
+        if (mainWindowWasMinimized && mainWindow && !mainWindow.isDestroyed() && mainWindow.isMinimized()) {
+          mainWindow.restore();
+        } else if (mainWindow && !mainWindow.isDestroyed() && !mainWindow.isFocused()) {
+          mainWindow.focus()
+        }
+        resolvePromise(value);
+      };
+
+      const onCaptureAreaSelected = async (_event: Electron.IpcMainEvent, rect: { x: number; y: number; width: number; height: number } | null) => {
+        if (!mainWindow || mainWindow.isDestroyed()) {
+            cleanupAndResolve(null);
+            return;
+        }
+        
+        if (!rect) { 
+            cleanupAndResolve(null);
+            return;
+        }
+
+        setTimeout(async () => {
+            try {
+                const fullScreenImage = await targetSource!.thumbnail.toDataURL();
+                const snipData = {
+                    dataUrl: fullScreenImage,
+                    cropRect: rect,
+                };
+
+                /* file Saving of image
+                
+                -- TODO: add back when  frontend has option to save to file or smth
+
+                const picturesPath = app.getPath('pictures');
+                const miscFolderPath = path.join(picturesPath, 'misc');
+                if (!fs.existsSync(miscFolderPath)) {
+                  fs.mkdirSync(miscFolderPath, { recursive: true });
+                }
+                const filePath = path.join(miscFolderPath, `snip-${Date.now()}.png`);
+                const base64Data = fullScreenImage.replace(/^data:image\/png;base64,/, "");
+                fs.writeFile(filePath, base64Data, 'base64', (err) => {
+                  if (err) console.error('Failed to save snip:', err);
+                  else console.log('Snip saved to:', filePath);
+                });
+                */
+
+                cleanupAndResolve(snipData);
+            } catch (captureError) {
+                console.error('Error capturing screen snip after selection:', captureError);
+                cleanupAndResolve(null);
+            }
+        }, 100);
+      };
+      
+      ipcMain.once('capture-area-selected', onCaptureAreaSelected);
+
+      selectorWindow.on('closed', () => {
+        cleanupAndResolve(null);
+      });
+      
+      const RESOURCES_PATH = app.isPackaged
+        ? path.join(process.resourcesPath, 'assets')
+        : path.join(__dirname, '../../assets');
+      const selectorHtmlPath = path.join(RESOURCES_PATH, 'screen-selector.html');
+      
+      if (!fs.existsSync(selectorHtmlPath)) {
+          console.error('screen-selector.html not found at', selectorHtmlPath);
+          const placeholderContent = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <title>Select Area</title>
+                <style>
+                    html, body { 
+                        background-color: transparent !important; 
+                        margin: 0; 
+                        padding: 0; 
+                        width: 100%; 
+                        height: 100%; 
+                        overflow: hidden; 
+                    }
+                    #selection-box {
+                        position: absolute;
+                        border: 2px dashed #007bff;
+                        background-color: rgba(0, 123, 255, 0.1);
+                        box-sizing: border-box;
+                    }
+                    #overlay {
+                        position: absolute;
+                        top:0; left:0; width:100%; height:100%;
+                        background-color: rgba(0,0,0,0.3);
+                        cursor: crosshair;
+                    }
+                </style>
+            </head>
+            <body>
+                <div id="overlay"></div>
+                <div id="selection-box"></div>
+                <script>
+                    const { ipcRenderer } = require('electron');
+                    const overlay = document.getElementById('overlay');
+                    const selectionBox = document.getElementById('selection-box');
+                    let startX, startY, isDrawing = false;
+
+                    document.addEventListener('keydown', (e) => {
+                        if (e.key === 'Escape') {
+                            ipcRenderer.send('capture-area-selected', null);
+                        }
+                    });
+
+                    overlay.addEventListener('mousedown', (e) => {
+                        startX = e.clientX;
+                        startY = e.clientY;
+                        isDrawing = true;
+                        selectionBox.style.left = startX + 'px';
+                        selectionBox.style.top = startY + 'px';
+                        selectionBox.style.width = '0px';
+                        selectionBox.style.height = '0px';
+                        selectionBox.style.display = 'block';
+                    });
+
+                    overlay.addEventListener('mousemove', (e) => {
+                        if (!isDrawing) return;
+                        const width = e.clientX - startX;
+                        const height = e.clientY - startY;
+                        selectionBox.style.width = Math.abs(width) + 'px';
+                        selectionBox.style.height = Math.abs(height) + 'px';
+                        selectionBox.style.left = (width > 0 ? startX : e.clientX) + 'px';
+                        selectionBox.style.top = (height > 0 ? startY : e.clientY) + 'px';
+                    });
+
+                    overlay.addEventListener('mouseup', (e) => {
+                        if (!isDrawing) return;
+                        isDrawing = false;
+                        selectionBox.style.display = 'none';
+                        const rect = {
+                            x: parseInt(selectionBox.style.left),
+                            y: parseInt(selectionBox.style.top),
+                            width: parseInt(selectionBox.style.width),
+                            height: parseInt(selectionBox.style.height)
+                        };
+                        if (rect.width > 0 && rect.height > 0) {
+                           ipcRenderer.send('capture-area-selected', rect);
+                        } else {
+                           ipcRenderer.send('capture-area-selected', null);
+                        }
+                    });
+                </script>
+            </body>
+            </html>
+          `;
+          const assetsDir = path.join(__dirname, '../../assets');
+          if (!fs.existsSync(assetsDir)){
+              fs.mkdirSync(assetsDir, { recursive: true });
+          }
+          fs.writeFileSync(selectorHtmlPath, placeholderContent);
+          console.log('Created placeholder screen-selector.html with explicit transparent body and Esc support.');
+      }
+      
+      selectorWindow.loadFile(selectorHtmlPath);
+    });
+  } catch (error) {
+    console.error('Error during capture-screen-snip setup:', error);
+    if (mainWindowWasMinimized && mainWindow && !mainWindow.isDestroyed() && mainWindow.isMinimized()) {
+      mainWindow.restore();
+    }
+    return null;
+  }
+});
+
 if (process.env.NODE_ENV === 'production') {
   const sourceMapSupport = require('source-map-support');
   sourceMapSupport.install();
@@ -39,9 +285,7 @@ if (process.env.NODE_ENV === 'production') {
 const isDebug =
   process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true';
 
-if (isDebug) {
-  require('electron-debug').default();
-}
+
 
 const installExtensions = async () => {
   const installer = require('electron-devtools-installer');
@@ -91,6 +335,10 @@ const createWindow = async () => {
       mainWindow.minimize();
     } else {
       mainWindow.show();
+    }
+    // Open DevTools for the main window if in debug mode
+    if (isDebug && mainWindow) {
+      mainWindow.webContents.openDevTools();
     }
   });
 

@@ -2,9 +2,78 @@ import { useState } from 'react';
 import { Box, Button, ButtonGroup, TextField, Typography, IconButton } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import { useNavigate } from 'react-router-dom';
+
+
+interface CapturedSnip {
+  dataUrl: string;
+  cropRect: { x: number; y: number; width: number; height: number };
+}
+
 export function Scanner() {
   const navigate = useNavigate();
   const [currentOption, setCurrentOption] = useState<"scan" | "input">("scan");
+  const [capturedImage, setCapturedImage] = useState<string | null>(null); 
+  const [isCapturing, setIsCapturing] = useState<boolean>(false); 
+
+  const handleScanClick = async () => {
+    if (isCapturing) return;
+    setIsCapturing(true);
+    setCapturedImage(null);
+
+    try {
+      if (window.electron && window.electron.ipcRenderer) {
+        const snipData: CapturedSnip | null = await window.electron.ipcRenderer.invoke('capture-screen-snip');
+        if (snipData && snipData.dataUrl && snipData.cropRect) {
+          const img = new Image();
+          img.onload = async () => { 
+            const canvas = document.createElement('canvas');
+            canvas.width = snipData.cropRect.width;
+            canvas.height = snipData.cropRect.height;
+            const ctx = canvas.getContext('2d');
+            if (ctx) {
+              ctx.drawImage(
+                img,
+                snipData.cropRect.x, snipData.cropRect.y,
+                snipData.cropRect.width, snipData.cropRect.height,
+                0, 0,
+                snipData.cropRect.width, snipData.cropRect.height
+              );
+              const croppedDataUrl = canvas.toDataURL('image/png');
+              setCapturedImage(croppedDataUrl);
+
+              // interact with backend
+              try {
+                console.log('Attempting to send image to backend...');
+                const backendResponse = await window.electron.api.sendImageToBackend(croppedDataUrl);
+                console.log('Successfully sent image to backend:', backendResponse);
+              } catch (uploadError) {
+                console.error('Failed to send image to backend:', uploadError);
+              }
+
+            } else {
+              console.error('Could not get canvas context');
+              setCapturedImage(snipData.dataUrl); 
+            }
+          };
+          img.onerror = () => {
+            console.error('Failed to load image for cropping.');
+            setCapturedImage(null);
+          };
+          img.src = snipData.dataUrl;
+        } else {
+          console.log('Screen snip was cancelled or failed.');
+          setCapturedImage(null);
+        }
+      } else {
+        console.error('Electron IPC not available. Are you running in Electron?');
+      }
+    } catch (error) {
+      console.error('Error during screen capture:', error);
+      setCapturedImage(null);
+    } finally {
+      setIsCapturing(false);
+    }
+  };
 
   return (
       <Box sx={{
@@ -71,6 +140,7 @@ export function Scanner() {
           backgroundColor: '#09090B',
           borderRadius: '20px',
           outline: '2px solid #27272A',
+          overflow: 'hidden',
         }}>
 
           {currentOption === "scan" ? (
@@ -79,17 +149,52 @@ export function Scanner() {
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              padding: '10px',
+              padding: '20px', 
+              width: '100%',
+              height: '100%',
+              gap: '20px', 
             }}> 
-              <Typography sx={{ fontSize: 20, fontWeight: "bold", color: "white" }}>Click to Scan</Typography>
-              <IconButton onClick={() => navigate('/analysis')} sx={{
-                backgroundColor: "#27272A", 
-                borderRadius: "10px",
-                padding: "10px",
-                marginTop: "10px",
-              }}>
-                <AddIcon sx={{ fontSize: 40, color: "white" }} />
-              </IconButton>
+              {isCapturing ? (
+                <Typography sx={{ fontSize: 20, fontWeight: "bold", color: "white" }}>Capturing...</Typography>
+              ) : capturedImage ? (
+                <>
+                  <img 
+                    src={capturedImage} 
+                    alt="Screen Snip" 
+                    style={{ maxWidth: 'calc(100% - 40px)', maxHeight: 'calc(100% - 80px)', objectFit: 'contain' }} 
+                  />
+                  <Button 
+                    variant="contained" 
+                    color="primary" 
+                    onClick={handleScanClick} 
+                    sx={{ 
+                      marginTop: '15px', 
+                      backgroundColor: '#27272A', 
+                      fontWeight: 'bold',
+                      '&:hover': {
+                        backgroundColor: '#3f3f46', 
+                      }
+                    }}
+                  >
+                    Take Another Screenshot
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Typography sx={{ fontSize: 20, fontWeight: "bold", color: "white" }}>Click to Scan</Typography>
+                  <IconButton onClick={handleScanClick} sx={{
+                    backgroundColor: "#27272A", 
+                    borderRadius: "10px",
+                    padding: "10px",
+                    marginTop: "10px",
+                    '&:hover': {
+                      backgroundColor: '#3f3f46',
+                    }
+                  }}>
+                    <AddIcon sx={{ fontSize: 40, color: "white" }} />
+                  </IconButton>
+                </>
+              )}
             </Box>
           ) : (
             <Box sx={{
