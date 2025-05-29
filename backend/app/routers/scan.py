@@ -13,36 +13,20 @@ class ImageData(BaseModel):
     imageData: str 
 
 #  for now it just uses the one in /img
-@router.get("/translate")
-async def translate_image():
+@router.post("/translate")
+async def translate_image(img: ImageData):
+    if not img.imageData:
+        logger.error("Received empty image data.")
+        raise HTTPException(status_code=400, detail="No image data received")
+
     try:
-        # You might want to make the image name dynamic, e.g., from a query parameter
-        extracted_text = perform_ocr_on_image("1.png") 
+        extracted_text = perform_ocr_on_image(img.imageData)
         return {
             "message": "File processed successfully",
             "translated_text": extracted_text,
         }
-    except FileNotFoundError as e:
-        return {"error": str(e), "message": "Failed to process image."}
-    except Exception as e:
-        # Log the exception e
-        return {"error": "An unexpected error occurred.", "message": "Failed to process image."}
-    
+    except Exception as e: 
+        logger.error(f"Error during OCR processing: {e}")
+        raise HTTPException(status_code=500, detail=f"Error processing image: {str(e)}")
 
-# New endpoint to receive image data from frontend
-@router.post("/receive-image")
-async def receive_image_data(image_payload: ImageData):
-    """
-    Receives image data from the frontend.
-    For now, just logs a confirmation.
-    """
-    if not image_payload.imageData:
-        logger.error("Received empty image data.")
-        raise HTTPException(status_code=400, detail="No image data received")
-
-    image_data_preview = image_payload.imageData[:100] + "..." if len(image_payload.imageData) > 100 else image_payload.imageData
-    logger.info(f"Received image data from frontend. Preview: {image_data_preview}")
-    print(f"Backend: Received image data successfully! Preview: {image_data_preview}") # For simple terminal output
-
-    return {"message": "Image received successfully by backend", "status": "ok"}
 
