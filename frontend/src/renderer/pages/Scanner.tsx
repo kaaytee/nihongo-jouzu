@@ -14,12 +14,14 @@ export function Scanner() {
   const [currentOption, setCurrentOption] = useState<"scan" | "input">("scan");
   const [capturedImage, setCapturedImage] = useState<string | null>(null); 
   const [isCapturing, setIsCapturing] = useState<boolean>(false); 
+  const [translatedText, setTranslatedText] = useState<string | null>(null);
 
   const handleScanClick = async () => {
     if (isCapturing) return;
     setIsCapturing(true);
     setCapturedImage(null);
 
+    // TODO: refactor this so it stops looking ugly
     try {
       if (window.electron && window.electron.ipcRenderer) {
         const snipData: CapturedSnip | null = await window.electron.ipcRenderer.invoke('capture-screen-snip');
@@ -46,8 +48,9 @@ export function Scanner() {
                 console.log('Attempting to send image to backend for translation...');
                 const backendResponse = await window.electron.api.sendImageForTranslation(croppedDataUrl);
                 console.log('Successfully sent image to backend for translation.');
-                if (backendResponse && backendResponse.translated_text) {
-                  console.log('Translated text:', backendResponse.translated_text);
+                if (backendResponse && backendResponse.translated_text.translated_text) {
+                  console.log('backendResponse:', backendResponse);
+                  setTranslatedText(backendResponse.translated_text.translated_text);
                 } else {
                   console.log('Backend response did not contain translated_text:', backendResponse);
                 }
@@ -216,6 +219,31 @@ export function Scanner() {
 
 
         </Box>
+        {translatedText && (
+          <Box sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '100%',
+            height: '100%',
+            backgroundColor: '#09090B',
+            borderRadius: '20px',
+            outline: '2px solid #27272A',
+            overflow: 'hidden',
+          }}>
+            <Typography sx={{ fontSize: 20, fontWeight: "bold", color: "white" }}>Translated Text</Typography>
+            <Typography sx={{ fontSize: 16, color: "white" }}>{translatedText}</Typography>
+            <Button 
+                    sx={{fontWeight: "bold", fontSize: "0.9375rem", color: "white", backgroundColor: "#27272A", borderRadius: "10px"}}
+                    onClick={() => {
+                      navigate(`/analysis`, {state: {text: translatedText}});
+                    }}
+            >
+              Analyze
+            </Button>
+          </Box>
+        )}
       </Box>
   )
 }

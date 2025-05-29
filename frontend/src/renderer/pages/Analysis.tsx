@@ -6,7 +6,7 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { use, useEffect, useState } from "react";
 import { kanjiDatabase, KanjiInfo } from '../misc/dummyData'
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const centeredFlexColumn = {
   display: 'flex',
@@ -23,23 +23,12 @@ const centeredFlexColumn = {
 
 export function Analysis() {
   const navigate = useNavigate(); 
-  const [text, setText] = useState("");
+  const { text } = useLocation().state;
   const [kanjiForDetailView, setKanjiForDetailView] = useState<KanjiInfo | null>(null);
   const [selectedPhrases, setSelectedPhrases] = useState<string[]>([]);
   const [hoveredChar, setHoveredChar] = useState<string | null>(null);
   const [tooltipKanjiInfo, setTooltipKanjiInfo] = useState<KanjiInfo | null>(null);
 
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const data = await window.electron.api.getDummyData();
-      // setText(data.translated_text);
-      
-      // backend api is not setup properly yet so just use this 
-      setText("私は日本語を勉強しています。 漢字は難しいですが、面白いです。");
-    }
-    fetchData();
-  }, []);
 
   // update kanjiForDetailView based on selectedPhrases
   useEffect(() => {
