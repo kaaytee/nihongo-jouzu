@@ -1,8 +1,7 @@
 import { useState } from 'react';
-import { Box, Button, ButtonGroup, TextField, Typography, IconButton } from '@mui/material';
+import { Box, Button, ButtonGroup, TextField, Typography, IconButton, CircularProgress } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import { useNavigate } from 'react-router-dom';
-
 
 interface CapturedSnip {
   dataUrl: string;
@@ -48,9 +47,9 @@ export function Scanner() {
                 console.log('Attempting to send image to backend for translation...');
                 const backendResponse = await window.electron.api.sendImageForTranslation(croppedDataUrl);
                 console.log('Successfully sent image to backend for translation.');
-                if (backendResponse && backendResponse.translated_text.translated_text) {
+                if (backendResponse) {
                   console.log('backendResponse:', backendResponse);
-                  setTranslatedText(backendResponse.translated_text.translated_text);
+                  setTranslatedText(backendResponse.translated_text);
                 } else {
                   console.log('Backend response did not contain translated_text:', backendResponse);
                 }
@@ -219,7 +218,7 @@ export function Scanner() {
 
 
         </Box>
-        {translatedText && (
+        {capturedImage && (
           <Box sx={{
             display: 'flex',
             flexDirection: 'column',
@@ -227,13 +226,18 @@ export function Scanner() {
             justifyContent: 'center',
             width: '100%',
             height: '100%',
+            boxSizing:'border-box',
             backgroundColor: '#09090B',
             borderRadius: '20px',
             outline: '2px solid #27272A',
             overflow: 'hidden',
+            gap: '20px',
           }}>
-            <Typography sx={{ fontSize: 20, fontWeight: "bold", color: "white" }}>Translated Text</Typography>
-            <Typography sx={{ fontSize: 16, color: "white" }}>{translatedText}</Typography>
+            <Typography sx={{ fontSize: "2.5rem", fontWeight: "bold", color: "white" }}>Translated Text</Typography>
+            { translatedText !== null 
+            ? <Typography sx={{ fontSize: "2.5rem", color: "white" }}>{translatedText}</Typography>  
+            : <CircularProgress sx={{ '--CircularProgress-size': '100px' }}></CircularProgress>}
+            
             <Button 
                     sx={{fontWeight: "bold", fontSize: "0.9375rem", color: "white", backgroundColor: "#27272A", borderRadius: "10px"}}
                     onClick={() => {
