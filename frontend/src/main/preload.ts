@@ -35,7 +35,7 @@ const electronHandler = {
     getDummyData: async () => {
       try {
         console.log("fetching dummy data");
-        const response = await axios.get(`${BACKEND_URL}/scan/translate`, {
+        const response = await axios.get(`${BACKEND_URL}/api/scan/translate`, {
           headers: {
             'Content-Type': 'application/json',
           },
@@ -52,8 +52,8 @@ const electronHandler = {
     },
     sendImageForTranslation: async (imageDataUrl: string) => {
       try {
-        console.log('Sending image to backend for translation (/scan/translate)...');
-        const response = await axios.post(`${BACKEND_URL}/scan/translate`, {
+        console.log('Sending image to backend for translation (/api/scan/translate)...');
+        const response = await axios.post(`${BACKEND_URL}/api/scan/translate`, {
           imageData: imageDataUrl,
         }, {
           headers: {
