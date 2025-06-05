@@ -3,14 +3,25 @@ import InputBase from '@mui/material/InputBase';
 import IconButton from '@mui/material/IconButton';  
 import SearchIcon from '@mui/icons-material/Search';
 import SubdirectoryArrowRightIcon from '@mui/icons-material/SubdirectoryArrowRight';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 
-// Currently
-export function DictionarySearchBar({ doSearch, search, setSearch }: { doSearch: (str: string) => void, search: string, setSearch: (str: string) => void }) {
+export function DictionarySearchBar({ doSearch, search }: { doSearch: (str: string) => void, search: string }) {
+  const [currentInputValue, setCurrentInputValue] = useState(search);
+
+  useEffect(() => {
+    setCurrentInputValue(search);
+  }, [search]);
+
+  const handleSubmit = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    doSearch(currentInputValue);
+  };
+
   return (
       <Paper
         component="form"
+        onSubmit={handleSubmit}
         sx={{
           boxSizing: "border-box",
           p: { xs: '3px 10px', md: '5px 20px' },
@@ -30,21 +41,22 @@ export function DictionarySearchBar({ doSearch, search, setSearch }: { doSearch:
         <InputBase
           onKeyUp={(e) => {
             if (e.key === 'Enter') {
-              doSearch(search);
+              handleSubmit();
             }
           }}
-          onChange={(e) => setSearch(e.target.value)}
-          value={search}
+          onChange={(e) => setCurrentInputValue(e.target.value)}
+          value={currentInputValue}
           sx={{ 
             ml: 1, 
             flex: 1, 
             color: "white", 
-            fontSize: { xs: "1rem", md: "1.25rem" }
+            fontSize: { xs: "1rem", md: "1.25rem" },
+            minWidth: 0
           }}
           placeholder="Search..."
           inputProps={{ 'aria-label': 'search for words, kanji, phrases and meanings' }}
         />
-        <IconButton type="button" sx={{ p: { xs: '5px', md: '10px' } }} aria-label="search" onClick={() => doSearch(search)}>
+        <IconButton type="submit" sx={{ p: { xs: '5px', md: '10px' } }} aria-label="search"> 
           <SubdirectoryArrowRightIcon sx={{fontSize: { xs: "1.5rem", md: "2rem" }, color: "white", cursor: "pointer"}} />
         </IconButton>
       </Paper>
