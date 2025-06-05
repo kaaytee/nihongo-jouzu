@@ -2,6 +2,7 @@ annotated-types==0.7.0
 anyio==4.5.2
 certifi==2025.4.26
 charset-normalizer==3.4.2
+chirptext==0.1.2
 click==8.1.8
 dnspython==2.6.1
 email_validator==2.2.0
@@ -20,6 +21,8 @@ httpx==0.28.1
 huggingface-hub==0.32.0
 idna==3.10
 jaconv==0.4.0
+jamdict==0.1a11.post2
+jamdict_data==1.5
 Jinja2==3.1.6
 loguru==0.7.3
 manga-ocr==0.1.14
@@ -45,6 +48,7 @@ nvidia-nvjitlink-cu12==12.6.85
 nvidia-nvtx-cu12==12.6.77
 packaging==25.0
 pillow==11.2.1
+puchikarui==0.1
 pydantic==2.10.6
 pydantic_core==2.27.2
 Pygments==2.19.1
