@@ -3,23 +3,31 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.routers import scan
+from app.routers import search as search_router
+
 app = FastAPI()
 
 load_dotenv()
 
-# Define the allowed origin from an environment variable, with a default
-FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:1212")
 
-# Add CORS middleware
+origins = [
+    "http://localhost:1212",
+    "http://localhost:5173",
+    os.environ.get("FRONTEND_URL", ""), 
+]
+
+origins = [origin for origin in origins if origin]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[FRONTEND_URL],  # Use the environment variable
+    allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],  # Allows all methods
-    allow_headers=["*"],  # Allows all headers
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
-app.include_router(scan.router)
+app.include_router(scan.router, prefix="/api", tags=["scan"])
+app.include_router(search_router.router, prefix="/api", tags=["search"])
 
 @app.get("/")
 async def root():
