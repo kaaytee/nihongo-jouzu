@@ -45,7 +45,7 @@ def perform_ocr_on_image(base64_data_url: str) -> str:
         extracted_text = ocr_tool(str(temp_image_path)) 
         logger.info(f"OCR extracted text successfully from {temp_image_path}")
         
-        return {"translated_text": extracted_text}
+        return extracted_text
 
     except Exception as e:
         logger.error(f"Error during OCR processing: {e}")
