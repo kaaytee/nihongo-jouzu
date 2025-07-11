@@ -8,7 +8,7 @@ export function Home () {
 
   return (
     <>
-      <ThemedBox sx={{ flexDirection:"column", padding:"20px", display:"flex", gap:"10px", height:"100%", width:"100%"}}>
+      <ThemedBox sx={{ flexDirection:"column", padding:"20px", display:"flex", gap:"10px", height:"100%", width:"100%", justifyContent: 'center', alignItems: 'center'}}>
         {/* Logo and quick start (just scan) */}
         <Box sx={{gap:"1.4rem", height:"40%", width:"100%", justifyContent:'center', alignItems:"center", display:"flex", flexDirection:"column"}}>
           <SettingsOverscanIcon sx={{

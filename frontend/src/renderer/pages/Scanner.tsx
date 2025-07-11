@@ -238,14 +238,14 @@ export function Scanner() {
             ? <Typography sx={{ fontSize: "2.5rem", color: "white" }}>{translatedText}</Typography>  
             : <CircularProgress sx={{ '--CircularProgress-size': '100px' }}></CircularProgress>}
             
-            <Button 
+            {translatedText && <Button 
                     sx={{fontWeight: "bold", fontSize: "0.9375rem", color: "white", backgroundColor: "#27272A", borderRadius: "10px"}}
                     onClick={() => {
                       navigate(`/analysis`, {state: {text: translatedText}});
                     }}
             >
               Analyze
-            </Button>
+            </Button>}
           </Box>
         )}
       </Box>

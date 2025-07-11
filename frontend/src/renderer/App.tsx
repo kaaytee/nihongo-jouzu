@@ -6,7 +6,7 @@ import { Scanner } from './pages/Scanner';
 import { Analysis } from './pages/Analysis';
 import { Dictionary } from './pages/Dictionary';
 import { useEffect } from 'react';
-import { Button } from '@mui/material';
+import { Box, Button } from '@mui/material';
 import { Home } from './pages/Home';
 
 
@@ -18,16 +18,12 @@ export default function App() {
   return (
     <>
         <div className='app'>
-          <div className='app-header'>
-            <h1>{location.pathname}</h1>
-            {/* placeholder buttons travel for now */}
-            <nav>
+          {location.pathname !== '/' && <Box sx={{ gap: '10px', display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: '10px'}}>
               <Button sx={{height: '50px', width: '100px', fontWeight: 'bold', color: 'white', backgroundColor: '#27272A', borderRadius: '10px'}} onClick={() => navigate('/scan')}>Scan</Button>
               <Button sx={{height: '50px', width: '100px', fontWeight: 'bold', color: 'white', backgroundColor: '#27272A', borderRadius: '10px'}} onClick={() => navigate('/')}>Home</Button>
-              
-              <Button sx={{height: '50px', width: '100px', fontWeight: 'bold', color: 'white', backgroundColor: '#27272A', borderRadius: '10px'}} onClick={() => navigate('/dictionary/example')}>Dictionary</Button>
-            </nav>
-          </div>
+
+              <Button sx={{height: '50px', width: '100px', fontWeight: 'bold', color: 'white', backgroundColor: '#27272A', borderRadius: '10px'}} onClick={() => navigate('/dictionary/')}>Dictionary</Button>
+          </Box>}
           <div className='app-content'>
               <Routes>
                 <Route path="/" element={<Home/>} />
@@ -36,6 +32,8 @@ export default function App() {
                 <Route path="/scan" element={<Scanner />} />
                 <Route path="/analysis" element={<Analysis />} />
                 <Route path="/dictionary/:phrase" element={<Dictionary />} />
+                <Route path="/dictionary" element={<Dictionary />} />
+
 
               </Routes>
           </div>
